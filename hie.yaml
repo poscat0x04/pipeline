@@ -1,0 +1,6 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "lib:pipeline"
+    - path: "./test"
+      component: "test:pipeline-test"
