@@ -19,12 +19,14 @@ extra-doc-files:
 
 common common-attrs
   build-depends:
-    , base        >=4.10 && <5
+    , base          >=4.10 && <5
+    , transformers
 
-  default-language:  Haskell2010
+  default-language:   Haskell2010
   default-extensions:
     NoStarIsType
     BangPatterns
+    BlockArguments
     ConstraintKinds
     DataKinds
     DefaultSignatures
@@ -63,20 +65,16 @@ common common-attrs
 library
   import:          common-attrs
   build-depends:
-
-  exposed-modules:
-
+  exposed-modules: Pipeline
   other-modules:
   hs-source-dirs:  src
 
 test-suite pipeline-test
-  import:          common-attrs
-  type:            exitcode-stdio-1.0
-  build-depends:
-    , pipeline
-
-  hs-source-dirs:  test
-  main-is:         Spec.hs
+  import:         common-attrs
+  type:           exitcode-stdio-1.0
+  build-depends:  pipeline
+  hs-source-dirs: test
+  main-is:        Spec.hs
 
 source-repository head
   type:     git
