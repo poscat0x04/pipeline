@@ -2,8 +2,10 @@
 
 module Pipeline where
 
+import Control.Monad.Trans.Class
 import Control.Monad.Trans.Cont
 import Data.Functor.Identity
+import Data.Void
 
 newtype ContPipe r i o m a = MakePipe {runPipe :: (a -> Result r m i o) -> Result r m i o}
   deriving
@@ -12,6 +14,9 @@ newtype ContPipe r i o m a = MakePipe {runPipe :: (a -> Result r m i o) -> Resul
       Monad
     )
     via (Cont (Result r m i o))
+
+instance MonadTrans (ContPipe r i o) where
+  lift m = MakePipe \k ik ok -> m >>= \a -> k a ik ok
 
 type Result r m i o = InCont r m i -> OutCont r m o -> m r
 
@@ -48,8 +53,10 @@ p .| q = MakePipe \k ik ok ->
     f :: Result r m i e
     f _ ok = resumeOut ok Nothing emptyIk
 
-runContPipe :: Applicative m => ContPipe a () () m a -> m a
+runContPipe :: forall m a. Applicative m => ContPipe a () Void m a -> m a
 runContPipe p = runPipe p (\a _ _ -> pure a) ik ok
   where
+    ik :: InCont a m ()
     ik = MakeInCont \ok' -> resumeOut ok' (Just ()) ik
+    ok :: OutCont a m Void
     ok = MakeOutCont \_ ik' -> resumeIn ik' ok
